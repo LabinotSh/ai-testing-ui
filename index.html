@@ -2296,6 +2296,10 @@
 		/* MESH GENERATION - IMAGE */
 		/* ========================================================= */
 
+		/* ========================================================= */
+		/* MESH GENERATION - IMAGE */
+		/* ========================================================= */
+
 		async function generateMeshFromImage() {
 
 			const file =
@@ -2324,7 +2328,11 @@
 
 
 			/*
-			 * Image -> 3D mesh request.
+			 * Image -> 3D mesh.
+			 *
+			 * POST /mesh/generate
+			 *
+			 * This endpoint returns the mesh result directly.
 			 */
 
 			const body = {
@@ -2332,33 +2340,33 @@
 				image_base64:
 					base64,
 
-				prompt:
+				remove_background:
 					document
 						.getElementById(
-							'meshGeneratePrompt'
+							'meshGenerateRemoveBackground'
 						)
-						.value || null,
+						.value === 'true',
 
-				negative_prompt:
+				generate_caption:
 					document
 						.getElementById(
-							'meshGenerateNegativePrompt'
+							'meshGenerateGenerateCaption'
 						)
-						.value || null,
+						.value === 'true',
 
-				session_id:
+				save_caption_input:
 					document
 						.getElementById(
-							'meshGenerateSessionId'
+							'meshGenerateSaveCaptionInput'
 						)
-						.value || null
+						.value === 'true'
 
 			};
 
 
 			setResponse(
 				'meshGenerateResponse',
-				'Submitting /mesh/generate and waiting for the AI job...'
+				'Generating 3D mesh from image...'
 			);
 
 
@@ -2382,29 +2390,11 @@
 				!result.success
 			);
 
-
-			/*
-			 * If the mesh generation endpoint
-			 * created a session, propagate it.
-			 */
-
-			const sessionId =
-				getSessionFromResult(result);
-
-
-			if (
-				result.success &&
-				sessionId
-			) {
-
-				applySessionId(
-					sessionId
-				);
-
-			}
-
 		}
 
+		/* ========================================================= */
+		/* MESH GENERATION - SKETCH */
+		/* ========================================================= */
 
 		/* ========================================================= */
 		/* MESH GENERATION - SKETCH */
@@ -2438,41 +2428,120 @@
 
 
 			/*
-			 * Sketch -> 3D mesh request.
+			 * Sketch -> photorealistic image -> 3D mesh.
+			 *
+			 * POST /mesh/sketch
+			 *
+			 * This endpoint also returns the mesh result directly.
 			 */
 
 			const body = {
 
-				sketch_base64:
+				image_base64:
 					base64,
 
-				prompt:
+				product_type:
 					document
 						.getElementById(
-							'meshSketchPrompt'
+							'meshSketchProductType'
 						)
-						.value || null,
+						.value || 'jewelry',
 
-				negative_prompt:
+				material:
 					document
 						.getElementById(
-							'meshSketchNegativePrompt'
+							'meshSketchMaterial'
 						)
-						.value || null,
+						.value || 'silver',
 
-				session_id:
+				item_type:
 					document
 						.getElementById(
-							'meshSketchSessionId'
+							'meshSketchItemType'
 						)
-						.value || null
+						.value || 'ring',
+
+				color:
+					document
+						.getElementById(
+							'meshSketchColor'
+						)
+						.value || 'silver',
+
+				description:
+					document
+						.getElementById(
+							'meshSketchDescription'
+						)
+						.value || '',
+
+				num_inference_steps:
+					Number(
+						document
+							.getElementById(
+								'meshSketchInferenceSteps'
+							)
+							.value
+					) || 35,
+
+				guidance_scale:
+					Number(
+						document
+							.getElementById(
+								'meshSketchGuidanceScale'
+							)
+							.value
+					) || 8.0,
+
+				jewelrynet_conditioning_scale:
+					Number(
+						document
+							.getElementById(
+								'meshSketchJewelryNetScale'
+							)
+							.value
+					) || 0.7,
+
+				seed:
+					Number(
+						document
+							.getElementById(
+								'meshSketchSeed'
+							)
+							.value
+					) || 42,
+
+				width:
+					Number(
+						document
+							.getElementById(
+								'meshSketchWidth'
+							)
+							.value
+					) || 1024,
+
+				height:
+					Number(
+						document
+							.getElementById(
+								'meshSketchHeight'
+							)
+							.value
+					) || 1024,
+
+				generate_caption:
+					document
+						.getElementById(
+							'meshSketchGenerateCaption'
+						)
+						.value === 'true'
 
 			};
 
 
 			setResponse(
 				'meshSketchResponse',
-				'Submitting /mesh/sketch and waiting for the AI job...'
+				'Generating image from sketch and creating 3D mesh...'
 			);
 
 
@@ -2496,30 +2565,7 @@
 				!result.success
 			);
 
-
-			/*
-			 * If the mesh generation endpoint
-			 * created a session, propagate it.
-			 */
-
-			const sessionId =
-				getSessionFromResult(result);
-
-
-			if (
-				result.success &&
-				sessionId
-			) {
-
-				applySessionId(
-					sessionId
-				);
-
-			}
-
 		}
-
-
 		/* ========================================================= */
 		/* EDIT */
 		/* ========================================================= */
