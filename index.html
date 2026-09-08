@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Gildform AI Service Endpoint Tester</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+			background: #0d0e11;
+			color: #e2e8f0;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1400px;
+			margin: 0 auto;
+		}
+
+		h1 {
+			color: #00d9f5;
+			margin-bottom: 20px;
+			font-size: 1.5rem;
+		}
+
+		.config,
+		.section {
+			background: #15171c;
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			border-radius: 8px;
+			padding: 20px;
+			margin-bottom: 20px;
+		}
+
+		.config input {
+			background: #1e2028;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 6px;
+			color: #e2e8f0;
+			padding: 10px;
+			width: min(600px, 100%);
+			font-size: 14px;
+		}
+
+		.config button,
+		.btn {
+			background: rgba(0, 217, 245, 0.1);
+			border: 1px solid rgba(0, 217, 245, 0.3);
+			border-radius: 6px;
+			color: #00d9f5;
+			padding: 10px 20px;
+			cursor: pointer;
+			font-size: 14px;
+		}
+
+		.config button:hover,
+		.btn:hover {
+			background: rgba(0, 217, 245, 0.18);
+		}
+
+		.config-row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			align-items: center;
+		}
+
+		.section h2 {
+			color: #94a3b8;
+			font-size: 1.1rem;
+			margin-bottom: 15px;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+			padding-bottom: 10px;
+		}
+
+		.endpoint {
+			background: #1e2028;
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			border-radius: 6px;
+			padding: 15px;
+			margin-bottom: 15px;
+		}
+
+		.endpoint-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+
+		.endpoint-title {
+			font-weight: 600;
+			color: #00d9f5;
+		}
+
+		.endpoint-method {
+			background: rgba(0, 217, 245, 0.2);
+			color: #00d9f5;
+			padding: 2px 8px;
+			border-radius: 4px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+
+		.endpoint-form {
+			display: grid;
+			gap: 10px;
+		}
+
+		.form-group {
+			display: grid;
+			gap: 5px;
+		}
+
+		.form-group label {
+			color: #94a3b8;
+			font-size: 12px;
+		}
+
+		.form-group input,
+		.form-group select,
+		.form-group textarea {
+			background: #0d0e11;
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 4px;
+			color: #e2e8f0;
+			padding: 8px;
+			font-size: 13px;
+			font-family: monospace;
+		}
+
+		.form-group input[type=file] {
+			background: #1e2028;
+		}
+
+		.form-group textarea {
+			min-height: 80px;
+			resize: vertical;
+		}
+
+		.form-row {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 10px;
+		}
+
+		.response {
+			background: #0d0e11;
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			border-radius: 4px;
+			padding: 10px;
+			margin-top: 10px;
+			font-family: monospace;
+			font-size: 12px;
+			max-height: 300px;
+			overflow: auto;
+			white-space: pre-wrap;
+			word-break: break-all;
+		}
+
+		.response.error {
+			border-color: #f87171;
+			color: #f87171;
+		}
+
+		.response.success {
+			border-color: #4ade80;
+			color: #4ade80;
+		}
+
+		.status {
+			display: inline-block;
+			padding: 2px 8px;
+			border-radius: 4px;
+			font-size: 11px;
+			margin-left: 10px;
+		}
+
+		.status.authenticated {
+			background: rgba(74, 222, 128, .2);
+			color: #4ade80;
+		}
+
+		.status.not-authenticated {
+			background: rgba(248, 113, 113, .2);
+			color: #f87171;
+		}
+
+		.tabs {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 5px;
+			margin-bottom: 15px;
+			border-bottom: 1px solid rgba(255, 255, 255, .08);
+			padding-bottom: 10px;
+		}
+
+		.tab {
+			background: transparent;
+			border: none;
+			color: #94a3b8;
+			padding: 8px 16px;
+			cursor: pointer;
+			border-radius: 4px;
+			font-size: 13px;
+		}
+
+		.tab:hover {
+			background: rgba(255, 255, 255, .05);
+		}
+
+		.tab.active {
+			background: rgba(0, 217, 245, .1);
+			color: #00d9f5;
+		}
+
+		.tab-content {
+			display: none;
+		}
+
+		.tab-content.active {
+			display: block;
+		}
+
+		.token-note {
+			color: #64748b;
+			font-size: 12px;
+			margin-top: 8px;
+			line-height: 1.5;
+		}
+
+		@media (max-width:700px) {
+			.form-row {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1>Gildform AI Service Endpoint Tester</h1>
+
+		<div class="config">
+			<div class="config-row">
+				<label style="color:#94a3b8;font-size:12px;">AI Service URL:</label>
+				<input type="text" id="serviceUrl" value="https://ai-api.gildform.com"
+					placeholder="https://ai-api.gildform.com">
+				<button onclick="testHealth()">Test Connection</button>
+				<button onclick="mintToken()">Get API Token</button>
+				<span id="authStatus" class="status not-authenticated">Not Authenticated</span>
+			</div>
+			<div class="token-note">
+				The tester uses POST /auth/token and sends the returned token as a Bearer token.
+				The token is kept only in this browser tab.
+			</div>
+		</div>
+
+		<div class="tabs">
+			<button class="tab active" onclick="showTab('upload')">Upload</button>
+			<button class="tab" onclick="showTab('edit')">Edit</button>
+			<button class="tab" onclick="showTab('resize')">Resize</button>
+			<button class="tab" onclick="showTab('session')">Session</button>
+			<button class="tab" onclick="showTab('utility')">Utility</button>
+		</div>
+
+		<div id="upload" class="tab-content active">
+			<div class="section">
+				<h2>Upload</h2>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /upload/image</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Image File</label>
+							<input type="file" id="uploadImageFile" accept="image/png,image/jpeg,image/webp">
+						</div>
+						<div class="form-row">
+							<div class="form-group">
+								<label>Mode</label>
+								<select id="uploadMode">
+									<option value="1">1 - Image to 3D</option>
+									<option value="2">2 - Sketch to 3D</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>Remove Background</label>
+								<select id="uploadRemoveBg">
+									<option value="true">Yes</option>
+									<option value="false">No</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="form-group">
+								<label>Generate Caption</label>
+								<select id="uploadGenCaption">
+									<option value="false">No</option>
+									<option value="true">Yes</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>Prompt (sketch mode)</label>
+								<input type="text" id="uploadPrompt" placeholder="Optional prompt">
+							</div>
+						</div>
+						<div class="form-group">
+							<label>Negative Prompt</label>
+							<input type="text" id="uploadNegPrompt" placeholder="Optional negative prompt">
+						</div>
+						<div class="form-group">
+							<label>Session ID (optional)</label>
+							<input type="text" id="uploadSessionId" placeholder="Auto-generated if empty">
+						</div>
+						<button class="btn" onclick="uploadImage()">Upload Image</button>
+						<div id="uploadImageResponse" class="response"></div>
+					</div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /upload/stl</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>STL File</label>
+							<input type="file" id="uploadStlFile" accept=".stl">
+						</div>
+						<div class="form-group">
+							<label>Session ID (optional)</label>
+							<input type="text" id="uploadStlSessionId" placeholder="Auto-generated if empty">
+						</div>
+						<button class="btn" onclick="uploadStl()">Upload STL</button>
+						<div id="uploadStlResponse" class="response"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="edit" class="tab-content">
+			<div class="section">
+				<h2>Edit Mesh</h2>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /edit/image</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Session ID</label>
+							<input type="text" id="editSessionId" placeholder="Required">
+						</div>
+						<div class="form-group">
+							<label>Prompt</label>
+							<textarea id="editPrompt" placeholder="e.g. Make the band thicker"></textarea>
+						</div>
+						<div class="form-row">
+							<div class="form-group">
+								<label>Negative Prompt</label>
+								<input type="text" id="editNegPrompt" placeholder="Optional">
+							</div>
+							<div class="form-group">
+								<label>Seed</label>
+								<input type="number" id="editSeed" placeholder="Random if empty">
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="form-group">
+								<label>Steps</label>
+								<input type="number" id="editSteps" value="20">
+							</div>
+							<div class="form-group">
+								<label>Guidance Scale</label>
+								<input type="number" id="editGuidance" value="7.5" step="0.1">
+							</div>
+						</div>
+						<button class="btn" onclick="editImage()">Edit Mesh</button>
+						<div id="editImageResponse" class="response"></div>
+					</div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">GET /edit/history</span>
+						<span class="endpoint-method">GET</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Session ID</label>
+							<input type="text" id="editHistorySessionId" placeholder="Required">
+						</div>
+						<button class="btn" onclick="getEditHistory()">Get Edit History</button>
+						<div id="editHistoryResponse" class="response"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="resize" class="tab-content">
+			<div class="section">
+				<h2>Resize Operations</h2>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /resize/stl</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Session ID</label>
+							<input type="text" id="resizeStlSessionId" placeholder="Required">
+						</div>
+						<div class="form-group">
+							<label>Target Diameter (mm)</label>
+							<input type="number" id="resizeDiameter" placeholder="e.g. 18.0">
+						</div>
+						<button class="btn" onclick="resizeStl()">Resize by Diameter</button>
+						<div id="resizeStlResponse" class="response"></div>
+					</div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /resize/from_text</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Session ID</label>
+							<input type="text" id="resizeTextSessionId" placeholder="Required">
+						</div>
+						<div class="form-group">
+							<label>Natural Language Text</label>
+							<textarea id="resizeText" placeholder="e.g. Ring size 7, or Make it 20mm wide"></textarea>
+						</div>
+						<button class="btn" onclick="resizeFromText()">Resize from Text</button>
+						<div id="resizeTextResponse" class="response"></div>
+					</div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /resize/template</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Session ID</label>
+							<input type="text" id="resizeTemplateSessionId" placeholder="Required">
+						</div>
+						<div class="form-row">
+							<div class="form-group"><label>Length (mm)</label><input type="number" id="resizeL"></div>
+							<div class="form-group"><label>Height (mm)</label><input type="number" id="resizeH"></div>
+						</div>
+						<div class="form-group">
+							<label>Depth (mm)</label><input type="number" id="resizeD">
+						</div>
+						<button class="btn" onclick="resizeTemplate()">Resize by Template</button>
+						<div id="resizeTemplateResponse" class="response"></div>
+					</div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">GET /resize/sizes</span>
+						<span class="endpoint-method">GET</span>
+					</div>
+					<button class="btn" onclick="getSizes()">Get Available Sizes</button>
+					<div id="getSizesResponse" class="response"></div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">GET /resize/measure</span>
+						<span class="endpoint-method">GET</span>
+					</div>
+					<div class="endpoint-form">
+						<div class="form-group">
+							<label>Mesh URL</label>
+							<input type="text" id="measureMeshUrl" placeholder="/view/session_id/filename.stl">
+						</div>
+						<button class="btn" onclick="measureMesh()">Measure Mesh</button>
+						<div id="measureMeshResponse" class="response"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="session" class="tab-content">
+			<div class="section">
+				<h2>Session Management</h2>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /session/new</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<button class="btn" onclick="newSession()">Create New Session</button>
+					<div id="newSessionResponse" class="response"></div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /session/&lt;id&gt;/close</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="form-group">
+						<label>Session ID</label>
+						<input type="text" id="closeSessionId" placeholder="Required">
+					</div>
+					<button class="btn" onclick="closeSession()">Close Session</button>
+					<div id="closeSessionResponse" class="response"></div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">GET /session/classification</span>
+						<span class="endpoint-method">GET</span>
+					</div>
+					<div class="form-group">
+						<label>Session ID</label>
+						<input type="text" id="classificationSessionId" placeholder="Required">
+					</div>
+					<button class="btn" onclick="getClassification()">Get Classification</button>
+					<div id="classificationResponse" class="response"></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="utility" class="tab-content">
+			<div class="section">
+				<h2>Utility Endpoints</h2>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">GET /health</span>
+						<span class="endpoint-method">GET</span>
+					</div>
+					<button class="btn" onclick="testHealth()">Health Check</button>
+					<div id="healthResponse" class="response"></div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">POST /rewrite/prompt</span>
+						<span class="endpoint-method">POST</span>
+					</div>
+					<div class="form-group">
+						<label>Prompt</label>
+						<textarea id="rewritePrompt" placeholder="Prompt to rewrite"></textarea>
+					</div>
+					<button class="btn" onclick="rewritePrompt()">Rewrite Prompt</button>
+					<div id="rewritePromptResponse" class="response"></div>
+				</div>
+
+				<div class="endpoint">
+					<div class="endpoint-header">
+						<span class="endpoint-title">GET /download/3dm/&lt;path&gt;</span>
+						<span class="endpoint-method">GET</span>
+					</div>
+					<div class="form-group">
+						<label>Path</label>
+						<input type="text" id="download3dmPath" placeholder="session_id/filename.stl">
+					</div>
+					<button class="btn" onclick="download3dm()">Download as 3DM</button>
+					<div id="download3dmResponse" class="response"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		let currentSessionId = null;
+		let bearerToken = null;
+
+		const POLL_INTERVAL_MS = 1500;
+		const MAX_POLL_TIME_MS = 10 * 60 * 1000;
+
+		function getServiceUrl() {
+			return document.getElementById('serviceUrl').value.trim().replace(/\/+$/, '');
+		}
+
+		function showTab(tabId) {
+			document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+			document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+			const tab = document.querySelector(`.tab[onclick="showTab('${tabId}')"]`);
+			if (tab) tab.classList.add('active');
+			document.getElementById(tabId).classList.add('active');
+		}
+
+		function setResponse(elementId, data, isError = false) {
+			const el = document.getElementById(elementId);
+			if (!el) return;
+			el.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+			el.className = 'response ' + (isError ? 'error' : 'success');
+		}
+
+		function setAuthStatus(authenticated) {
+			const el = document.getElementById('authStatus');
+			el.textContent = authenticated ? 'Authenticated' : 'Not Authenticated';
+			el.className = authenticated ? 'status authenticated' : 'status not-authenticated';
+		}
+
+		function extractToken(data) {
+			if (!data || typeof data !== 'object') return null;
+			return data.token || data.access_token || data.accessToken || data.bearer_token || null;
+		}
+
+		async function parseResponse(response) {
+			const text = await response.text();
+			if (!text) return null;
+			try { return JSON.parse(text); }
+			catch { return text; }
+		}
+
+		async function rawFetch(endpoint, method = 'GET', body = null, includeAuth = true) {
+			const url = `${getServiceUrl()}${endpoint}`;
+			const headers = {};
+
+			if (includeAuth && bearerToken) {
+				headers.Authorization = `Bearer ${bearerToken}`;
+			}
+
+			let requestBody = body;
+
+			if (body !== null && !(body instanceof FormData)) {
+				headers['Content-Type'] = 'application/json';
+				requestBody = JSON.stringify(body);
+			}
+
+			try {
+				const response = await fetch(url, {
+					method,
+					headers,
+					body: requestBody
+				});
+
+				const data = await parseResponse(response);
+
+				return {
+					success: response.ok,
+					status: response.status,
+					data,
+					headers: Object.fromEntries(response.headers.entries())
+				};
+			} catch (error) {
+				return { success: false, status: 0, error: error.message };
+			}
+		}
+
+		async function mintToken() {
+			// The documented production API currently mints a token without credentials.
+			const result = await rawFetch('/auth/token', 'POST', {});
+			console.log('result mintToken :>> ', result);
+
+			if (result.success) {
+				const token = extractToken(result.data);
+
+				if (token) {
+					bearerToken = token;
+					setAuthStatus(true);
+					setResponse('healthResponse', {
+						message: 'Bearer token acquired',
+						expires_in: result.data.expires_in ?? result.data.expiresIn ?? null
+					});
+					return token;
+				}
+
+				setAuthStatus(false);
+				setResponse('healthResponse', {
+					error: 'Token endpoint returned successfully but no token field was found.',
+					response: result.data
+				}, true);
+				return null;
+			}
+
+			setAuthStatus(false);
+			setResponse('healthResponse', result, true);
+			return null;
+		}
+
+		async function ensureToken() {
+			if (bearerToken) return true;
+			const token = await mintToken();
+			return !!token;
+		}
+
+		async function apiCall(endpoint, method = 'GET', body = null, options = {}) {
+			const requiresAuth = options.requiresAuth !== false;
+
+			if (requiresAuth && !(await ensureToken())) {
+				return {
+					success: false,
+					status: 401,
+					data: { error: 'Could not obtain API token.' }
+				};
+			}
+
+			let result = await rawFetch(endpoint, method, body, requiresAuth);
+
+			// If the token expired, mint once and retry.
+			if (requiresAuth && result.status === 401) {
+				bearerToken = null;
+				setAuthStatus(false);
+
+				if (await ensureToken()) {
+					result = await rawFetch(endpoint, method, body, true);
+				}
+			}
+
+			// The API uses 202 + job_id for asynchronous operations.
+			if (result.status === 202 && result.data) {
+				return await pollJobIfNeeded(result);
+			}
+
+			return result;
+		}
+
+		function getJobId(data) {
+			if (!data || typeof data !== 'object') return null;
+			return data.job_id || data.jobId || null;
+		}
+
+		function getPollUrl(data) {
+			if (!data || typeof data !== 'object') return null;
+			return data.poll_url || data.pollUrl || null;
+		}
+
+		async function pollJobIfNeeded(initialResult) {
+			const data = initialResult.data;
+			const jobId = getJobId(data);
+
+			if (!jobId) {
+				// Some 202 responses may already contain useful data but no job ID.
+				return initialResult;
+			}
+
+			const startedAt = Date.now();
+			let pollUrl = getPollUrl(data);
+
+			// The documented poll endpoint is GET /jobs/{job_id}.
+			if (!pollUrl) {
+				pollUrl = `/jobs/${encodeURIComponent(jobId)}`;
+			} else if (/^https?:\/\//i.test(pollUrl)) {
+				// Keep absolute poll URLs returned by the API.
+			}
+
+			while (Date.now() - startedAt < MAX_POLL_TIME_MS) {
+				await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+
+				const result = await rawFetch(pollUrl, 'GET', null, true);
+				console.log('result pollUrl---:>> ', result);
+
+				if (!result.success && result.status !== 202) {
+					return result;
+				}
+
+				const job = result.data || {};
+				const state = String(
+					job.status || job.state || job.job_status || ''
+				).toLowerCase();
+
+				if (state === 'done' || state === 'completed' || state === 'success' || state === 'succeeded') {
+					return {
+						...result,
+						status: result.status || 200,
+						data: {
+							...job,
+							_async: {
+								job_id: jobId,
+								final_status: state
+							}
+						}
+					};
+				}
+
+				if (state === 'error' || state === 'failed' || state === 'failure') {
+					return {
+						...result,
+						success: false,
+						data: {
+							...job,
+							_async: {
+								job_id: jobId,
+								final_status: state
+							}
+						}
+					};
+				}
+
+				// If the API returns HTTP 200 with a response but no explicit state,
+				// treat a terminal result containing result/output/data as complete.
+				if (result.status === 200 && (
+					Object.prototype.hasOwnProperty.call(job, 'result') ||
+					Object.prototype.hasOwnProperty.call(job, 'output')
+				)) {
+					return result;
+				}
+			}
+
+			return {
+				success: false,
+				status: 408,
+				data: {
+					error: 'Job polling timed out after 10 minutes.',
+					job_id: jobId,
+					poll_url: pollUrl
+				}
+			};
+		}
+
+		function fileToBase64(file) {
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onload = () => resolve(reader.result);
+				reader.onerror = reject;
+			});
+		}
+
+		async function testHealth() {
+			const result = await apiCall('/health', 'GET', null, { requiresAuth: false });
+			setResponse('healthResponse', result, !result.success);
+		}
+
+		async function newSession() {
+			const result = await apiCall('/session/new', 'POST');
+			console.log('result newSession :>> ', result);
+			setResponse('newSessionResponse', result, !result.success);
+
+			const sessionId = result.data?.session_id || result.data?.sessionId;
+			if (result.success && sessionId) {
+				currentSessionId = sessionId;
+				document.querySelectorAll('input[id*="SessionId"]').forEach(input => {
+					if (!input.value) input.value = currentSessionId;
+				});
+			}
+		}
+
+		async function closeSession() {
+			const sessionId = document.getElementById('closeSessionId').value.trim();
+			if (!sessionId) {
+				setResponse('closeSessionResponse', 'Session ID required', true);
+				return;
+			}
+			const result = await apiCall(`/session/${encodeURIComponent(sessionId)}/close`, 'POST');
+			setResponse('closeSessionResponse', result, !result.success);
+		}
+
+		async function uploadImage() {
+			const file = document.getElementById('uploadImageFile').files[0];
+			if (!file) {
+				setResponse('uploadImageResponse', 'Please select an image file', true);
+				return;
+			}
+
+			const base64 = await fileToBase64(file);
+
+			const body = {
+				image_base64: base64,
+				mode: parseInt(document.getElementById('uploadMode').value, 10),
+				remove_background: document.getElementById('uploadRemoveBg').value === 'true',
+				generate_caption: document.getElementById('uploadGenCaption').value === 'true',
+				prompt: document.getElementById('uploadPrompt').value || null,
+				negative_prompt: document.getElementById('uploadNegPrompt').value || null,
+				session_id: document.getElementById('uploadSessionId').value || null
+			};
+
+			const result = await apiCall('/upload/image', 'POST', body);
+			console.log('result upload/image---:>> ', result);
+			setResponse('uploadImageResponse', result, !result.success);
+
+			const sessionId = result.data?.session_id || result.data?.sessionId;
+			if (result.success && sessionId) {
+				currentSessionId = sessionId;
+				document.querySelectorAll('input[id*="SessionId"]').forEach(input => {
+					if (!input.value) input.value = currentSessionId;
+				});
+			}
+		}
+
+		async function uploadStl() {
+			const file = document.getElementById('uploadStlFile').files[0];
+			if (!file) {
+				setResponse('uploadStlResponse', 'Please select an STL file', true);
+				return;
+			}
+
+			const base64 = await fileToBase64(file);
+
+			const body = {
+				stl_base64: base64,
+				session_id: document.getElementById('uploadStlSessionId').value || null
+			};
+
+			const result = await apiCall('/upload/stl', 'POST', body);
+			console.log('result upload/stl :>> ', result);
+			setResponse('uploadStlResponse', result, !result.success);
+		}
+
+		async function editImage() {
+			const sessionId = document.getElementById('editSessionId').value.trim();
+			if (!sessionId) {
+				setResponse('editImageResponse', 'Session ID required', true);
+				return;
+			}
+
+			const body = {
+				session_id: sessionId,
+				prompt: document.getElementById('editPrompt').value,
+				negative_prompt: document.getElementById('editNegPrompt').value || null,
+				seed: document.getElementById('editSeed').value
+					? parseInt(document.getElementById('editSeed').value, 10)
+					: null,
+				steps: parseInt(document.getElementById('editSteps').value, 10),
+				guidance_scale: parseFloat(document.getElementById('editGuidance').value)
+			};
+
+			const result = await apiCall('/edit/image', 'POST', body);
+			console.log('result :edit/image--->> ', result);
+			setResponse('editImageResponse', result, !result.success);
+		}
+
+		async function getEditHistory() {
+			const sessionId = document.getElementById('editHistorySessionId').value.trim();
+			if (!sessionId) {
+				setResponse('editHistoryResponse', 'Session ID required', true);
+				return;
+			}
+
+			const result = await apiCall(
+				`/edit/history?session_id=${encodeURIComponent(sessionId)}`,
+				'GET'
+			);
+			console.log('result edit/history---:>> ', result);
+			setResponse('editHistoryResponse', result, !result.success);
+		}
+
+		async function resizeStl() {
+			const sessionId = document.getElementById('resizeStlSessionId').value.trim();
+			const diameter = document.getElementById('resizeDiameter').value;
+
+			if (!sessionId || !diameter) {
+				setResponse('resizeStlResponse', 'Session ID and diameter required', true);
+				return;
+			}
+
+			const result = await apiCall('/resize/stl', 'POST', {
+				session_id: sessionId,
+				diameter_mm: parseFloat(diameter)
+			});
+			console.log('resize/stl  restult---:>> ', result);
+
+			setResponse('resizeStlResponse', result, !result.success);
+		}
+
+		async function resizeFromText() {
+			const sessionId = document.getElementById('resizeTextSessionId').value.trim();
+			const text = document.getElementById('resizeText').value;
+
+			if (!sessionId || !text) {
+				setResponse('resizeTextResponse', 'Session ID and text required', true);
+				return;
+			}
+
+			const result = await apiCall('/resize/from_text', 'POST', {
+				session_id: sessionId,
+				text
+			});
+			console.log('result :resize/from_text--->> ', result);
+
+			setResponse('resizeTextResponse', result, !result.success);
+		}
+
+		async function resizeTemplate() {
+			const sessionId = document.getElementById('resizeTemplateSessionId').value.trim();
+
+			if (!sessionId) {
+				setResponse('resizeTemplateResponse', 'Session ID required', true);
+				return;
+			}
+
+			const body = { session_id: sessionId };
+			const l = document.getElementById('resizeL').value;
+			const h = document.getElementById('resizeH').value;
+			const d = document.getElementById('resizeD').value;
+
+			if (l) body.l = parseFloat(l);
+			if (h) body.h = parseFloat(h);
+			if (d) body.d = parseFloat(d);
+
+			const result = await apiCall('/resize/template', 'POST', body);
+			setResponse('resizeTemplateResponse', result, !result.success);
+		}
+
+		async function getSizes() {
+			const result = await apiCall('/resize/sizes', 'GET');
+			setResponse('getSizesResponse', result, !result.success);
+		}
+
+		async function measureMesh() {
+			const meshUrl = document.getElementById('measureMeshUrl').value.trim();
+
+			if (!meshUrl) {
+				setResponse('measureMeshResponse', 'Mesh URL required', true);
+				return;
+			}
+
+			const result = await apiCall(
+				`/resize/measure?mesh_url=${encodeURIComponent(meshUrl)}`,
+				'GET'
+			);
+
+			setResponse('measureMeshResponse', result, !result.success);
+		}
+
+		async function getClassification() {
+			const sessionId = document.getElementById('classificationSessionId').value.trim();
+
+			if (!sessionId) {
+				setResponse('classificationResponse', 'Session ID required', true);
+				return;
+			}
+
+			const result = await apiCall(
+				`/session/classification?session_id=${encodeURIComponent(sessionId)}`,
+				'GET'
+			);
+
+			setResponse('classificationResponse', result, !result.success);
+		}
+
+		async function rewritePrompt() {
+			const prompt = document.getElementById('rewritePrompt').value.trim();
+
+			if (!prompt) {
+				setResponse('rewritePromptResponse', 'Prompt required', true);
+				return;
+			}
+
+			const result = await apiCall('/rewrite/prompt', 'POST', { prompt });
+			setResponse('rewritePromptResponse', result, !result.success);
+		}
+
+		async function download3dm() {
+			const path = document.getElementById('download3dmPath').value.trim();
+
+			if (!path) {
+				setResponse('download3dmResponse', 'Path required', true);
+				return;
+			}
+
+			// This endpoint returns a file rather than JSON, so fetch it directly.
+			if (!(await ensureToken())) {
+				setResponse('download3dmResponse', 'Could not obtain API token.', true);
+				return;
+			}
+
+			const url = `${getServiceUrl()}/download/3dm/${path.split('/').map(encodeURIComponent).join('/')}`;
+
+			try {
+				const response = await fetch(url, {
+					headers: { Authorization: `Bearer ${bearerToken}` }
+				});
+
+				if (!response.ok) {
+					setResponse('download3dmResponse', {
+						status: response.status,
+						body: await parseResponse(response)
+					}, true);
+					return;
+				}
+
+				const blob = await response.blob();
+				const objectUrl = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = objectUrl;
+				a.download = path.split('/').pop()?.replace(/\.[^.]+$/, '') + '.3dm';
+				document.body.appendChild(a);
+				a.click();
+				a.remove();
+				URL.revokeObjectURL(objectUrl);
+
+				setResponse('download3dmResponse', {
+					success: true,
+					message: '3DM download started.'
+				});
+			} catch (error) {
+				setResponse('download3dmResponse', error.message, true);
+			}
+		}
+
+		window.onload = function () {
+			testHealth();
+		};
+	</script>
+</body>
+
+</html>
