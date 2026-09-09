@@ -2045,13 +2045,16 @@
 
 		async function closeSession() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'closeSessionId'
+				) ?
 				document
 					.getElementById(
 						'closeSessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!sessionId) {
@@ -2119,7 +2122,10 @@
 				image_base64:
 					base64,
 
-				mode:
+				mode: document
+					.getElementById(
+						'uploadMode'
+					) ?
 					parseInt(
 						document
 							.getElementById(
@@ -2127,42 +2133,58 @@
 							)
 							.value,
 						10
-					),
+					) : 10,
 
-				remove_background:
+				remove_background: document
+					.getElementById(
+						'uploadRemoveBg'
+					) ?
 					document
 						.getElementById(
 							'uploadRemoveBg'
 						)
-						.value === 'true',
+						.value === 'true' : null,
 
-				generate_caption:
+				generate_caption: document
+					.getElementById(
+						'uploadGenCaption'
+					) ?
 					document
 						.getElementById(
 							'uploadGenCaption'
 						)
-						.value === 'true',
+						.value === 'true' : null,
 
-				prompt:
+				prompt: document
+					.getElementById(
+						'uploadPrompt'
+					) ?
 					document
 						.getElementById(
 							'uploadPrompt'
 						)
-						.value || null,
+						.value || null : null,
 
-				negative_prompt:
+				negative_prompt: document
+					.getElementById(
+						'uploadNegPrompt'
+					) ?
 					document
 						.getElementById(
 							'uploadNegPrompt'
 						)
-						.value || null,
+						.value || null : null,
 
 				session_id:
 					document
 						.getElementById(
 							'uploadSessionId'
-						)
-						.value || null
+						) ?
+						document
+							.getElementById(
+								'uploadSessionId'
+							)
+							.value || null : null
 
 			};
 
@@ -2242,12 +2264,15 @@
 				stl_base64:
 					base64,
 
-				session_id:
+				session_id: document
+					.getElementById(
+						'uploadStlSessionId'
+					) ?
 					document
 						.getElementById(
 							'uploadStlSessionId'
 						)
-						.value || null
+						.value || null : null
 
 			};
 
@@ -2697,13 +2722,16 @@
 
 		async function editImage() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'editSessionId'
+				) ?
 				document
 					.getElementById(
 						'editSessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!sessionId) {
@@ -2724,19 +2752,24 @@
 				session_id:
 					sessionId,
 
-				prompt:
-					document
+				prompt: document
+					.getElementById(
+						'editPrompt'
+					) ? document
 						.getElementById(
 							'editPrompt'
 						)
-						.value,
+					.value : null,
 
-				negative_prompt:
+				negative_prompt: document
+					.getElementById(
+						'editNegPrompt'
+					) ?
 					document
 						.getElementById(
 							'editNegPrompt'
 						)
-						.value || null,
+						.value || null : null,
 
 				seed:
 					document
@@ -2754,7 +2787,10 @@
 						)
 						: null,
 
-				steps:
+				steps: document
+					.getElementById(
+						'editSteps'
+					) ?
 					parseInt(
 						document
 							.getElementById(
@@ -2762,16 +2798,19 @@
 							)
 							.value,
 						10
-					),
+					) : 10,
 
-				guidance_scale:
+				guidance_scale: document
+					.getElementById(
+						'editGuidance'
+					) ?
 					parseFloat(
 						document
 							.getElementById(
 								'editGuidance'
 							)
 							.value
-					)
+					) : 7.5
 
 			};
 
@@ -2795,13 +2834,16 @@
 
 		async function getEditHistory() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'editHistorySessionId'
+				) ?
 				document
 					.getElementById(
 						'editHistorySessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!sessionId) {
@@ -2839,21 +2881,27 @@
 
 		async function resizeStl() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'resizeStlSessionId'
+				) ?
 				document
 					.getElementById(
 						'resizeStlSessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
-			const diameter =
-				document
+			const diameter = document
+				.getElementById(
+					'resizeDiameter'
+				) ? document
 					.getElementById(
 						'resizeDiameter'
 					)
-					.value;
+				.value : null;
+
 
 
 			if (
@@ -2897,21 +2945,27 @@
 
 		async function resizeFromText() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'resizeTextSessionId'
+				) ?
 				document
 					.getElementById(
 						'resizeTextSessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
-			const text =
+			const text = document
+				.getElementById(
+					'resizeText'
+				) ?
 				document
 					.getElementById(
 						'resizeText'
 					)
-					.value;
+					.value : null;
 
 
 			if (
@@ -2954,13 +3008,16 @@
 
 		async function resizeTemplate() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'resizeTemplateSessionId'
+				) ?
 				document
 					.getElementById(
 						'resizeTemplateSessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!sessionId) {
@@ -2982,28 +3039,37 @@
 			};
 
 
-			const l =
+			const l = document
+				.getElementById(
+					'resizeL'
+				) ?
 				document
 					.getElementById(
 						'resizeL'
 					)
-					.value;
+					.value : null;
 
 
-			const h =
+			const h = document
+				.getElementById(
+					'resizeH'
+				) ?
 				document
 					.getElementById(
 						'resizeH'
 					)
-					.value;
+					.value : null;
 
 
-			const d =
+			const d = document
+				.getElementById(
+					'resizeD'
+				) ?
 				document
 					.getElementById(
 						'resizeD'
 					)
-					.value;
+					.value : null;
 
 
 			if (l) {
@@ -3059,13 +3125,16 @@
 
 		async function measureMesh() {
 
-			const meshUrl =
+			const meshUrl = document
+				.getElementById(
+					'measureMeshUrl'
+				) ?
 				document
 					.getElementById(
 						'measureMeshUrl'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!meshUrl) {
@@ -3103,13 +3172,16 @@
 
 		async function getClassification() {
 
-			const sessionId =
+			const sessionId = document
+				.getElementById(
+					'classificationSessionId'
+				) ?
 				document
 					.getElementById(
 						'classificationSessionId'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!sessionId) {
@@ -3147,13 +3219,16 @@
 
 		async function rewritePrompt() {
 
-			const prompt =
+			const prompt = document
+				.getElementById(
+					'rewritePrompt'
+				) ?
 				document
 					.getElementById(
 						'rewritePrompt'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!prompt) {
@@ -3194,13 +3269,16 @@
 
 		async function download3dm() {
 
-			const path =
+			const path = document
+				.getElementById(
+					'download3dmPath'
+				) ?
 				document
 					.getElementById(
 						'download3dmPath'
 					)
 					.value
-					.trim();
+					.trim() : null;
 
 
 			if (!path) {
