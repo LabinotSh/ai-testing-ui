@@ -866,11 +866,21 @@
 						</div>
 
 
-						<div class="form-group">
+						<!-- <div class="form-group">
 
 							<label>Target Diameter (mm)</label>
 
 							<input type="number" id="resizeDiameter" placeholder="e.g. 18.0">
+
+						</div> -->
+
+						<div class="form-group">
+
+							<label>Mode</label>
+							<select id="resizeMode">
+								<option value="ring">Ring</option>
+								<option value="bracelet">Bracelet</option>
+							</select>
 
 						</div>
 
@@ -2748,10 +2758,8 @@
 
 
 			const body = {
-
 				session_id:
 					sessionId,
-
 				prompt: document
 					.getElementById(
 						'editPrompt'
@@ -2760,7 +2768,6 @@
 							'editPrompt'
 						)
 					.value : null,
-
 				negative_prompt: document
 					.getElementById(
 						'editNegPrompt'
@@ -2770,7 +2777,6 @@
 							'editNegPrompt'
 						)
 						.value || null : null,
-
 				seed:
 					document
 						.getElementById(
@@ -2786,7 +2792,6 @@
 							10
 						)
 						: null,
-
 				steps: document
 					.getElementById(
 						'editSteps'
@@ -2799,7 +2804,6 @@
 							.value,
 						10
 					) : 10,
-
 				guidance_scale: document
 					.getElementById(
 						'editGuidance'
@@ -2811,7 +2815,6 @@
 							)
 							.value
 					) : 7.5
-
 			};
 
 
@@ -2821,6 +2824,59 @@
 					'POST',
 					body
 				);
+
+			console.log(' result --- /edit/image :>> ', result);
+
+			if (
+				result.success &&
+				result.data.mesh_url
+			) {
+
+				const fullMeshUrl =
+					`https://ai-api.gildform.com${result.data.mesh_url}`;
+
+				console.log(
+					'STL URL:',
+					fullMeshUrl
+				);
+
+				const token =
+					await mintToken();
+				console.log('token 1111:>> ', token);
+				// Download STL
+				const response = await fetch(
+					fullMeshUrl,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`
+						}
+					}
+				);
+				console.log('response fullMeshUrl:>> ', response);
+
+				const blob =
+					await response.blob();
+
+				const url =
+					window.URL.createObjectURL(
+						blob
+					);
+
+				const a =
+					document.createElement('a');
+
+				a.href = url;
+				a.download =
+					`${result.data.mesh_id}.stl`;
+
+				a.click();
+
+				window.URL.revokeObjectURL(
+					url
+				);
+			}
+
+
 
 
 			setResponse(
@@ -2905,8 +2961,8 @@
 
 
 			if (
-				!sessionId ||
-				!diameter
+				!sessionId
+				// || !diameter
 			) {
 
 				setResponse(
@@ -2927,11 +2983,62 @@
 					{
 						session_id:
 							sessionId,
-
-						diameter_mm:
-							parseFloat(diameter)
+						mode: document.getElementById('resizeMode').value ? document.getElementById('resizeMode').value : 'ring',
+						size: 7
 					}
 				);
+
+			console.log('result : /resize/stl>> ', result);
+
+			if (
+				result.success &&
+				result.data.mesh_url
+			) {
+
+				const fullMeshUrl =
+					`https://ai-api.gildform.com${result.data.mesh_url}`;
+
+				console.log(
+					'STL URL:',
+					fullMeshUrl
+				);
+
+				const token =
+					await mintToken();
+				console.log('token 1111:>> ', token);
+				// Download STL
+				const response = await fetch(
+					fullMeshUrl,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`
+						}
+					}
+				);
+				console.log('response fullMeshUrl:>> ', response);
+
+				const blob =
+					await response.blob();
+
+				const url =
+					window.URL.createObjectURL(
+						blob
+					);
+
+				const a =
+					document.createElement('a');
+
+				a.href = url;
+				a.download =
+					`${result.data.mesh_id}.stl`;
+
+				a.click();
+
+				window.URL.revokeObjectURL(
+					url
+				);
+			}
+
 
 
 			setResponse(
@@ -2991,10 +3098,60 @@
 					{
 						session_id:
 							sessionId,
-
 						text
 					}
 				);
+
+			console.log('result : resize/from_text>> ', result);
+
+			if (
+				result.success &&
+				result.data &&
+				result.data.result.mesh_url
+			) {
+				const fullMeshUrl =
+					`https://ai-api.gildform.com${result.data.result.mesh_url}`;
+
+				console.log(
+					'STL URL:',
+					fullMeshUrl
+				);
+
+				const token =
+					await mintToken();
+				console.log('token 1111:>> ', token);
+				// Download STL
+				const response = await fetch(
+					fullMeshUrl,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`
+						}
+					}
+				);
+				console.log('response fullMeshUrl:>> ', response);
+
+				const blob =
+					await response.blob();
+
+				const url =
+					window.URL.createObjectURL(
+						blob
+					);
+
+				const a =
+					document.createElement('a');
+
+				a.href = url;
+				a.download =
+					`${result.data.mesh_id}.stl`;
+
+				a.click();
+
+				window.URL.revokeObjectURL(
+					url
+				);
+			}
 
 
 			setResponse(
