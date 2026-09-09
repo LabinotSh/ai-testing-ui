@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -2309,6 +2308,7 @@
 					)
 					.files[0];
 
+			console.log('file  generateMeshFromImage---:>> ', file);
 
 			if (!file) {
 
@@ -2326,7 +2326,8 @@
 			const base64 =
 				await fileToBase64(file);
 
-
+			console.log('BASE64 START:', base64.substring(0, 100));
+			console.log('BASE64 LENGTH:', base64.length);
 			/*
 			 * Image -> 3D mesh.
 			 *
@@ -2335,32 +2336,26 @@
 			 * This endpoint returns the mesh result directly.
 			 */
 
+			const cleanBase64 = base64.includes(',')
+				? base64.split(',')[1]
+				: base64;
+
 			const body = {
-
-				image_base64:
-					base64,
-
+				image_base64: cleanBase64,
 				remove_background:
-					document
-						.getElementById(
-							'meshGenerateRemoveBackground'
-						)
-						.value === 'true',
-
+					false,
 				generate_caption:
-					document
-						.getElementById(
-							'meshGenerateGenerateCaption'
-						)
-						.value === 'true',
-
+					document.getElementById(
+						'meshGenerateGenerateCaption'
+					) ? document.getElementById(
+						'meshGenerateGenerateCaption'
+					).value === 'true' ?? false : false,
 				save_caption_input:
-					document
-						.getElementById(
-							'meshGenerateSaveCaptionInput'
-						)
-						.value === 'true'
-
+					document.getElementById(
+						'meshGenerateSaveCaptionInput'
+					) ? document.getElementById(
+						'meshGenerateSaveCaptionInput'
+					).value === 'true' ?? false : false
 			};
 
 
@@ -2382,6 +2377,58 @@
 				'/mesh/generate result:',
 				result
 			);
+
+			if (
+				result.success &&
+				result.data &&
+				result.data.mesh_url
+			) {
+
+				const fullMeshUrl =
+					`https://ai-api.gildform.com${result.data.mesh_url}`;
+
+				console.log(
+					'STL URL:',
+					fullMeshUrl
+				);
+
+
+				console.log('fullMeshUrl 2222 :>> ', fullMeshUrl);
+				const token =
+					await mintToken();
+				console.log('token 1111:>> ', token);
+				// Download STL
+				const response = await fetch(
+					fullMeshUrl,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`
+						}
+					}
+				);
+				console.log('response fullMeshUrl:>> ', response);
+
+				const blob =
+					await response.blob();
+
+				const url =
+					window.URL.createObjectURL(
+						blob
+					);
+
+				const a =
+					document.createElement('a');
+
+				a.href = url;
+				a.download =
+					`${result.data.mesh_id}.stl`;
+
+				a.click();
+
+				window.URL.revokeObjectURL(
+					url
+				);
+			}
 
 
 			setResponse(
@@ -2426,6 +2473,10 @@
 			const base64 =
 				await fileToBase64(file);
 
+			const cleanBase64 = base64.includes(',')
+				? base64.split(',')[1]
+				: base64;
+
 
 			/*
 			 * Sketch -> photorealistic image -> 3D mesh.
@@ -2436,108 +2487,127 @@
 			 */
 
 			const body = {
-
 				image_base64:
-					base64,
-
+					cleanBase64,
 				product_type:
 					document
 						.getElementById(
 							'meshSketchProductType'
-						)
-						.value || 'jewelry',
-
+						) ?
+						document
+							.getElementById(
+								'meshSketchProductType'
+							)
+							.value || 'jewelry' : 'jewelry',
 				material:
 					document
 						.getElementById(
 							'meshSketchMaterial'
-						)
-						.value || 'silver',
-
+						) ?
+						document
+							.getElementById(
+								'meshSketchMaterial'
+							)
+							.value || 'silver' : 'silver',
 				item_type:
 					document
 						.getElementById(
 							'meshSketchItemType'
-						)
-						.value || 'ring',
-
+						) ?
+						document
+							.getElementById(
+								'meshSketchItemType'
+							)
+							.value || 'ring' : 'ring',
 				color:
 					document
 						.getElementById(
 							'meshSketchColor'
-						)
-						.value || 'silver',
-
+						) ?
+						document
+							.getElementById(
+								'meshSketchColor'
+							)
+							.value || 'silver' : 'silver',
 				description:
 					document
 						.getElementById(
 							'meshSketchDescription'
-						)
-						.value || '',
-
+						) ?
+						document
+							.getElementById(
+								'meshSketchDescription'
+							)
+							.value || '' : '',
 				num_inference_steps:
-					Number(
-						document
-							.getElementById(
-								'meshSketchInferenceSteps'
-							)
-							.value
-					) || 35,
-
+					document
+						.getElementById(
+							'meshSketchInferenceSteps'
+						) ?
+						Number(
+							document
+								.getElementById(
+									'meshSketchInferenceSteps'
+								)
+								.value
+						) || 35 : 35,
 				guidance_scale:
-					Number(
-						document
-							.getElementById(
-								'meshSketchGuidanceScale'
-							)
-							.value
-					) || 8.0,
-
-				jewelrynet_conditioning_scale:
-					Number(
-						document
-							.getElementById(
-								'meshSketchJewelryNetScale'
-							)
-							.value
-					) || 0.7,
-
-				seed:
+					document
+						.getElementById(
+							'meshSketchGuidanceScale'
+						) ?
+						Number(
+							document
+								.getElementById(
+									'meshSketchGuidanceScale'
+								)
+								.value
+						) || 8.0 : 8.0,
+				seed: document
+					.getElementById(
+						'meshSketchSeed'
+					) ?
 					Number(
 						document
 							.getElementById(
 								'meshSketchSeed'
 							)
 							.value
-					) || 42,
-
-				width:
+					) || 42 : 42,
+				width: document
+					.getElementById(
+						'meshSketchWidth'
+					) ?
 					Number(
 						document
 							.getElementById(
 								'meshSketchWidth'
 							)
 							.value
-					) || 1024,
-
+					) || 1024 : 1024,
 				height:
-					Number(
-						document
-							.getElementById(
-								'meshSketchHeight'
-							)
-							.value
-					) || 1024,
+					document
+						.getElementById(
+							'meshSketchHeight'
+						) ?
+						Number(
+							document
+								.getElementById(
+									'meshSketchHeight'
+								)
+								.value
+						) || 1024 : 1024,
 
-				generate_caption:
+				generate_caption: document
+					.getElementById(
+						'meshSketchGenerateCaption'
+					) ?
 					document
 						.getElementById(
 							'meshSketchGenerateCaption'
 						)
-						.value === 'true'
-
+						.value === 'true' : false
 			};
-
 
 			setResponse(
 				'meshSketchResponse',
@@ -2557,6 +2627,61 @@
 				'/mesh/sketch result:',
 				result
 			);
+
+
+			console.log('result 2222222 :>> ', result);
+			if (
+				result.success &&
+				result.data &&
+				result.data.mesh_url
+			) {
+
+				const fullMeshUrl =
+					`https://ai-api.gildform.com${result.data.mesh_url}`;
+
+				console.log(
+					'STL URL:',
+					fullMeshUrl
+				);
+
+
+				console.log('fullMeshUrl 2222 :>> ', fullMeshUrl);
+				const token =
+					await mintToken();
+				console.log('token 1111:>> ', token);
+				// Download STL
+				const response = await fetch(
+					fullMeshUrl,
+					{
+						headers: {
+							Authorization: `Bearer ${token}`
+						}
+					}
+				);
+				console.log('response fullMeshUrl:>> ', response);
+
+				const blob =
+					await response.blob();
+
+				const url =
+					window.URL.createObjectURL(
+						blob
+					);
+
+				const a =
+					document.createElement('a');
+
+				a.href = url;
+				a.download =
+					`${result.data.mesh_id}.stl`;
+
+				a.click();
+
+				window.URL.revokeObjectURL(
+					url
+				);
+			}
+
 
 
 			setResponse(
